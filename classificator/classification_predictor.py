@@ -8,16 +8,13 @@ from sklearn.externals import joblib
 
 from helpers import dataframe_helper
 
-data_source_url = 'data/data.csv'
+data_source_url = '../data/data.csv'
 
 dataFrameHelper = dataframe_helper.DataframeHelper()
 
 columns_to_read = dataFrameHelper.getusedcols()
 dataset = pd.read_csv(data_source_url, usecols=columns_to_read, converters={'delivery_address_zip': str})
-# nr_of_cols = 21
 # dataFrameHelper.printDataFrameInfo(dataset)
-
-
 
 dataFrameHelper.preprocess(dataset)
 
