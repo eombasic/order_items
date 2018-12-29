@@ -8,7 +8,7 @@ from sklearn.externals import joblib
 
 from helpers import dataframe_helper
 
-data_source_url = 'data.csv'
+data_source_url = 'data/data.csv'
 
 dataFrameHelper = dataframe_helper.DataframeHelper()
 
