@@ -1,5 +1,48 @@
 class DataframeHelper:
 
+    data_path = '../data/'
+
+    def get_raw_data_file_location(self):
+        return self.data_path + 'data_raw.csv'
+
+    col_definitions = {
+        "item_total_quantity":          {"use": True, "label_encode": False},
+        "item_costs":                   {"use": True, "label_encode": False},
+        "late":                         {"use": True, "label_encode": False},
+        "early":                        {"use": True, "label_encode": False},
+        "on_time":                      {"use": True, "label_encode": False},
+        "delivery_deviation_in_days":   {"use": True, "label_encode": False},
+        "item_commodity_id":            {"use": False, "label_encode": True},
+        "idx":                          {"use": False, "label_encode": True},
+        "unit_id":                      {"use": False, "label_encode": True},
+        "group_structure_id":           {"use": False, "label_encode": True},
+        "purchasing_organisation":      {"use": True, "label_encode": True},
+        "company_code":                 {"use": True, "label_encode": True},
+        "order_incoterm":               {"use": True, "label_encode": True},
+        "zterm_name":                   {"use": False, "label_encode": True},
+        "order_type":                   {"use": True, "label_encode": True},
+        "item_created_by_supplier":     {"use": True, "label_encode": False},
+        "item_quantity_created_by_supplier":          {"use": True, "label_encode": False},
+        "order_created_on_day":         {"use": True, "label_encode": False},
+        "deliver_on_day":               {"use": True, "label_encode": False},
+        "order_created_in_month":       {"use": True, "label_encode": False},
+        "deliver_in_month":             {"use": True, "label_encode": False},
+        "cluster_id":                   {"use": False, "label_encode": True},
+        "parent_cluster_id":            {"use": True, "label_encode": True},
+        "root_cluster":                 {"use": True, "label_encode": False},
+        "supplier_country":             {"use": True, "label_encode": True},
+        "delivery_address_country":     {"use": True, "label_encode": True},
+        "supplier_zip":                 {"use": False, "label_encode": True},
+        "delivery_address_zip":         {"use": True, "label_encode": True},
+        "same_country":                 {"use": True, "label_encode": False},
+        "same_zip":                     {"use": True, "label_encode": False},
+        "item_count":                   {"use": True, "label_encode": False},
+        "order_item_quantity_count":    {"use": True, "label_encode": False},
+        "requested_delivery_date":      {"use": False, "label_encode": False},
+        "delivery_date":                {"use": False, "label_encode": False},
+        "original_lifespan":            {"use": True, "label_encode": False},
+    }
+
     eu_countries = [
         "DE", "GB", "AU", "GB", "NL", "HU", "FR", "IT", "NL", "CH", "CZ", "MT", "LI", "ES", "SE", "BE", "PT", "RO", "SK"
     ]
@@ -54,44 +97,23 @@ class DataframeHelper:
     }
 
     def getusedcols(self):
-        return [
-            'item_total_quantity',
-            'item_costs',
-            'delivery_deviation_in_days',
-            #'item_commodity_id',
-            #'idx',
-            #'unit_id',
-            'group_structure_id',
-            'purchasing_organisation',
-            'company_code',
-            'order_created_on_day',
-            'deliver_on_day',
-            'cluster_id',
-            'delivery_address_country',
-            'delivery_address_zip',
-            'supplier_country',
-            # 'supplier_zip',
-            'item_count',
-            'order_item_quantity_count',
-            'original_lifespan',
-            'early',
-            'late',
-        ]
+
+        use_cols = []
+
+        for col_name, col_definition in self.col_definitions.items():
+            if col_definition["use"]:
+                use_cols.append(col_name)
+
+        return use_cols
 
     def getLabelCols(self):
-        return [
-            #'item_commodity_id',
-           # 'idx',
-            #'unit_id',
-            'group_structure_id',
-            'purchasing_organisation',
-            'company_code',
-            'cluster_id',
-             'delivery_address_country',
-            'delivery_address_zip',
-            'supplier_country',
-            # 'supplier_zip',
-        ]
+
+        use_cols = []
+        for col_name, col_definition in self.col_definitions.items():
+            if col_definition["use"] and col_definition["label_encode"]:
+                use_cols.append(col_name)
+
+        return use_cols
 
     def printDataFrameInfo(self, df):
         print("Number of rows {} ".format(len(df.index)))
@@ -99,8 +121,9 @@ class DataframeHelper:
         # print("dupplicated rows {}".format(df.duplicated()))
 
     def preprocess(self, df):
+        # df[['early', 'on_time', 'late']] = df[['early', 'on_time', 'late']].fillna(value=0)
         df.drop_duplicates(keep='first', inplace=True)
-        df.dropna(inplace=True)
+        #df.dropna(inplace=True)
 
     def move_sunday(self, row):
         if row['deliver_on_day'] == 1:
@@ -114,9 +137,9 @@ class DataframeHelper:
 
     def set_state(self, row):
         ret = 'on_time'
-        if row['delivery_deviation_in_days'] > 0:
+        if row['late'] > 0:
             ret = 'late'
-        if row['delivery_deviation_in_days'] < 0:
+        if row['early'] > 0:
             ret = 'early'
         return ret
 

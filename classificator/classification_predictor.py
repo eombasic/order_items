@@ -5,10 +5,11 @@ from keras.layers import Dense
 from keras.layers import Dropout
 from keras.optimizers import Adam
 from sklearn.externals import joblib
+import numpy as np
 
 from helpers import dataframe_helper
 
-data_source_url = '../data/data.csv'
+data_source_url = '../data/data_raw.csv'
 
 dataFrameHelper = dataframe_helper.DataframeHelper()
 
@@ -30,8 +31,8 @@ exit()
 # correlations = dataset.corr()
 # dataFrameHelper.printDataFrameInfo(dataset)
 
-dataFrameHelper.move_df_sunday(dataset, 'deliver_on_day')
-dataFrameHelper.move_df_sunday(dataset, 'order_created_on_day')
+# dataFrameHelper.move_df_sunday(dataset, 'deliver_on_day')
+# dataFrameHelper.move_df_sunday(dataset, 'order_created_on_day')
 
 dataFrameHelper.add_country_distances(dataset)
 
@@ -57,14 +58,33 @@ exit()
 dataset['deviation_type'] = 0
 dataFrameHelper.set_deviation_types(dataset)
 
+
+
+'''
+
+counts = dataset['group_structure_id'].value_counts()
+print(counts)
+
+counts = dataset['on_time'].value_counts()
+print(counts)
+
+counts = dataset['late'].value_counts()
+print(counts)
+'''
+
 dataset.drop('delivery_deviation_in_days', axis=1, inplace=True)
 dataset.drop('late', axis=1, inplace=True)
 dataset.drop('early', axis=1, inplace=True)
 
+
+
+
 columns_to_encode = dataFrameHelper.getLabelCols()
 
 for col_name_to_label in columns_to_encode:
+    print(col_name_to_label)
     encoder_commodity = LabelEncoder()
+    dataset[col_name_to_label] = dataset[col_name_to_label].fillna('0')
     encoder_commodity.fit(dataset[col_name_to_label])
     dataset[col_name_to_label] = encoder_commodity.transform(dataset[col_name_to_label])
     joblib.dump(encoder_commodity, col_name_to_label + '.npy')
@@ -75,6 +95,7 @@ nr_of_cols = len(dataset.columns) - 1
 X = dataset.iloc[:, 0:nr_of_cols].values
 y = dataset.iloc[:, nr_of_cols].values
 
+
 encoder = LabelEncoder()
 encoder.fit(y)
 y1 = encoder.transform(y)
@@ -82,11 +103,13 @@ Y = pd.get_dummies(y1).values
 joblib.dump(encoder, 'y_encoder.npy')
 
 
+
 deviation_type_value_counts = dataset['deviation_type'].value_counts(normalize=True)
 
-on_time_weight = 100 - (deviation_type_value_counts['on_time'])*100
-early_weight = 100 - (deviation_type_value_counts['early'])*100
-late_weight = 100 - (deviation_type_value_counts['late'])*100
+
+on_time_weight = 100 - (deviation_type_value_counts['on_time']*100)
+early_weight = 100 - (deviation_type_value_counts['early']*100)
+late_weight = 100 - (deviation_type_value_counts['late']*100)
 
 print(on_time_weight)
 print(early_weight)
@@ -94,18 +117,26 @@ print(late_weight)
 
 print(encoder.classes_)
 print(type(encoder.classes_))
-exit()
 
-class_weight = {0: 1.,
-                1: 4.,
-                2: 1.}
+early_index = np.where(encoder.classes_ == 'early')
+print(early_index)
+print(early_index[0][0])
+
+on_time_index = np.where(encoder.classes_ == 'on_time')
+print(on_time_index)
+print(on_time_index[0][0])
+
+late_index = np.where(encoder.classes_ == 'late')
+print(late_index)
+print(late_index[0][0])
+#exit()
+
+class_weight = {on_time_index[0][0]: on_time_weight,
+                late_index[0][0]: late_weight,
+                early_index[0][0]: early_weight}
 
 print(class_weight)
 
-
-
-class_weight = {}
-class_weight = 1
 
 model = Sequential()
 model.add(Dense(nr_of_cols,input_shape=(nr_of_cols,),activation='relu', name='features'))

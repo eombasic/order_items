@@ -3,3 +3,5 @@ helpers/__pycache__/
 .DS_Store
 .idea/
 *.npy
+classificator/model.h5
+classificator/model.json
