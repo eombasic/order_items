@@ -17,18 +17,12 @@ columns_to_read = dataFrameHelper.getusedcols()
 dataset = pd.read_csv(data_source_url, usecols=columns_to_read, converters={'delivery_address_zip': str})
 # dataFrameHelper.printDataFrameInfo(dataset)
 
-dataFrameHelper.preprocess(dataset)
+# dataFrameHelper.preprocess(dataset)
 
 dataset.dropna(subset=['requested_delivery_date'], inplace=True)
 dataset.drop('requested_delivery_date', axis=1, inplace=True)
 
-dataset['item_quantity_created_by_supplier'] = dataset['item_quantity_created_by_supplier'].fillna('0')
-dataset['supplier_country'] = dataset['supplier_country'].fillna('-')
-dataset['delivery_address_country'] = dataset['delivery_address_country'].fillna('-')
-dataset['zterm_name'] = dataset['zterm_name'].fillna('-')
-dataset['cluster_id'] = dataset['cluster_id'].fillna(0)
-dataset['group_structure_id'] = dataset['group_structure_id'].fillna(0)
-dataset['item_commodity_id'] = dataset['item_commodity_id'].fillna(0)
+dataFrameHelper.fillNaVals(dataset)
 
 dataFrameHelper.add_country_distances(dataset)
 

@@ -6,41 +6,41 @@ class DataframeHelper:
         return self.data_path + 'data_raw.csv'
 
     col_definitions = {
-        "item_total_quantity":          {"use": True, "label_encode": False},
-        "item_costs":                   {"use": True, "label_encode": False},
-        "late":                         {"use": True, "label_encode": False},
-        "early":                        {"use": True, "label_encode": False},
-        "on_time":                      {"use": True, "label_encode": False},
-        "delivery_deviation_in_days":   {"use": True, "label_encode": False},
-        "item_commodity_id":            {"use": True, "label_encode": True},
-        "idx":                          {"use": True, "label_encode": True},
-        "unit_id":                      {"use": True, "label_encode": True},
-        "group_structure_id":           {"use": True, "label_encode": True},
-        "purchasing_organisation":      {"use": True, "label_encode": True},
-        "company_code":                 {"use": True, "label_encode": True},
-        "order_incoterm":               {"use": True, "label_encode": True},
-        "zterm_name":                   {"use": True, "label_encode": True},
-        "order_type":                   {"use": True, "label_encode": True},
-        "item_created_by_supplier":     {"use": True, "label_encode": False},
-        "item_quantity_created_by_supplier":          {"use": True, "label_encode": False},
-        "order_created_on_day":         {"use": True, "label_encode": False},
-        "deliver_on_day":               {"use": True, "label_encode": False},
-        "order_created_in_month":       {"use": True, "label_encode": False},
-        "deliver_in_month":             {"use": True, "label_encode": False},
-        "cluster_id":                   {"use": True, "label_encode": True},
-        "parent_cluster_id":            {"use": True, "label_encode": True},
-        "root_cluster":                 {"use": True, "label_encode": False},
-        "supplier_country":             {"use": True, "label_encode": True},
-        "delivery_address_country":     {"use": True, "label_encode": True},
-        "supplier_zip":                 {"use": False, "label_encode": True},
-        "delivery_address_zip":         {"use": True, "label_encode": True},
-        "same_country":                 {"use": True, "label_encode": False},
-        "same_zip":                     {"use": True, "label_encode": False},
-        "item_count":                   {"use": True, "label_encode": False},
-        "order_item_quantity_count":    {"use": True, "label_encode": False},
-        "requested_delivery_date":      {"use": True, "label_encode": False},
-        "delivery_date":                {"use": False, "label_encode": False},
-        "original_lifespan":            {"use": True, "label_encode": False},
+        "item_total_quantity":          {"use": True, "label_encode": False, "fillna": False},
+        "item_costs":                   {"use": True, "label_encode": False, "fillna": False},
+        "late":                         {"use": True, "label_encode": False, "fillna": False},
+        "early":                        {"use": True, "label_encode": False, "fillna": False},
+        "on_time":                      {"use": True, "label_encode": False, "fillna": False},
+        "delivery_deviation_in_days":   {"use": True, "label_encode": False, "fillna": False},
+        "item_commodity_id":            {"use": True, "label_encode": True, "fillna": True, "fillna_val": 0},
+        "idx":                          {"use": True, "label_encode": True, "fillna": False},
+        "unit_id":                      {"use": True, "label_encode": True, "fillna": False},
+        "group_structure_id":           {"use": True, "label_encode": True, "fillna": True, "fillna_val": 0},
+        "purchasing_organisation":      {"use": True, "label_encode": True, "fillna": False},
+        "company_code":                 {"use": True, "label_encode": True, "fillna": False},
+        "order_incoterm":               {"use": True, "label_encode": True, "fillna": False},
+        "zterm_name":                   {"use": True, "label_encode": True, "fillna": True, "fillna_val": '-'},
+        "order_type":                   {"use": True, "label_encode": True, "fillna": False},
+        "item_created_by_supplier":     {"use": True, "label_encode": False, "fillna": False},
+        "item_quantity_created_by_supplier":          {"use": True, "label_encode": False, "fillna": True, "fillna_val": '0'},
+        "order_created_on_day":         {"use": True, "label_encode": False, "fillna": False},
+        "deliver_on_day":               {"use": True, "label_encode": False, "fillna": False},
+        "order_created_in_month":       {"use": True, "label_encode": False, "fillna": False},
+        "deliver_in_month":             {"use": True, "label_encode": False, "fillna": False},
+        "cluster_id":                   {"use": True, "label_encode": True, "fillna": True, "fillna_val": 0},
+        "parent_cluster_id":            {"use": True, "label_encode": True, "fillna": False},
+        "root_cluster":                 {"use": True, "label_encode": False, "fillna": False},
+        "supplier_country":             {"use": True, "label_encode": True, "fillna": True, "fillna_val": '-'},
+        "delivery_address_country":     {"use": True, "label_encode": True, "fillna": True, "fillna_val": '-'},
+        "supplier_zip":                 {"use": False, "label_encode": True, "fillna": False},
+        "delivery_address_zip":         {"use": True, "label_encode": True, "fillna": False},
+        "same_country":                 {"use": True, "label_encode": False, "fillna": False},
+        "same_zip":                     {"use": True, "label_encode": False, "fillna": False},
+        "item_count":                   {"use": True, "label_encode": False, "fillna": False},
+        "order_item_quantity_count":    {"use": True, "label_encode": False, "fillna": False},
+        "requested_delivery_date":      {"use": True, "label_encode": False, "fillna": False},
+        "delivery_date":                {"use": False, "label_encode": False, "fillna": False},
+        "original_lifespan":            {"use": True, "label_encode": False, "fillna": False},
     }
 
     eu_countries = [
@@ -119,6 +119,12 @@ class DataframeHelper:
         print("Number of rows {} ".format(len(df.index)))
         print(df.describe())
         # print("dupplicated rows {}".format(df.duplicated()))
+
+    def fillNaVals(self, df):
+        for col_name, col_definition in self.col_definitions.items():
+            if col_definition["fillna"]:
+                print("Fill {} with {}".format(col_name, col_definition['fillna_val']))
+                df[col_name] = df[col_name].fillna(col_definition['fillna_val'])
 
     def printFirstNa(self, df):
         nulls = df[df.isnull().any(axis=1)]
