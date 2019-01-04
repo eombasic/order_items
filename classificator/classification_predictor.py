@@ -42,11 +42,12 @@ dataFrameHelper.set_deviation_types(dataset)
 dataset.drop('delivery_deviation_in_days', axis=1, inplace=True)
 dataset.drop('late', axis=1, inplace=True)
 dataset.drop('early', axis=1, inplace=True)
+dataset.drop('on_time', axis=1, inplace=True)
 
 columns_to_encode = dataFrameHelper.getLabelCols()
 
 for col_name_to_label in columns_to_encode:
-    print(col_name_to_label)
+    # print(col_name_to_label)
     encoder_commodity = LabelEncoder()
     dataset[col_name_to_label] = dataset[col_name_to_label].fillna('0')
     encoder_commodity.fit(dataset[col_name_to_label])
@@ -89,7 +90,7 @@ model.add(Dense(13,activation='relu'))
 model.add(Dense(7,activation='relu'))
 model.add(Dense(5,activation='relu'))
 model.add(Dense(3,activation='softmax'))
-model.compile(Adam(lr=0.02),'categorical_crossentropy',metrics=['accuracy'])
+model.compile(Adam(lr=0.0001),'categorical_crossentropy',metrics=['accuracy'])
 model.fit(X, Y, epochs=20, batch_size=500, class_weight=class_weight)
 model.summary()
 
