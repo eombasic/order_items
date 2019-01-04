@@ -23,22 +23,15 @@ dataset.dropna(subset=['requested_delivery_date'], inplace=True)
 dataset.drop('requested_delivery_date', axis=1, inplace=True)
 
 dataFrameHelper.fillNaVals(dataset)
-
 dataFrameHelper.add_country_distances(dataset)
-
 dataFrameHelper.add_eu_flag_customer(dataset)
 dataFrameHelper.add_eu_flag_supplier(dataset)
-
 dataFrameHelper.add_us_flag_customer(dataset)
 dataFrameHelper.add_us_flag_supplier(dataset)
-
 dataFrameHelper.add_asia_flag_customer(dataset)
 dataFrameHelper.add_asia_flag_supplier(dataset)
-
 dataset['deviation_type'] = 0
 dataFrameHelper.set_deviation_types(dataset)
-
-
 dataset.drop('delivery_deviation_in_days', axis=1, inplace=True)
 dataset.drop('late', axis=1, inplace=True)
 dataset.drop('early', axis=1, inplace=True)
@@ -86,7 +79,7 @@ class_weight = {on_time_index[0][0]: on_time_weight,
 model = Sequential()
 model.add(Dense(nr_of_cols,input_shape=(nr_of_cols,),activation='relu', name='features'))
 model.add(Dense(13,activation='relu'))
-# model.add(Dropout(0.4))
+model.add(Dropout(0.2))
 model.add(Dense(7,activation='relu'))
 model.add(Dense(5,activation='relu'))
 model.add(Dense(3,activation='softmax'))

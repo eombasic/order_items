@@ -4,32 +4,30 @@ from sklearn.externals import joblib
 from keras.models import model_from_json
 from helpers import dataframe_helper
 
+data_source_url = '../data/data_test.csv'
 
-data_source_url = 'data_test.csv'
 dataFrameHelper = dataframe_helper.DataframeHelper()
-columns_to_read = dataFrameHelper.getusedcols()
 
+columns_to_read = dataFrameHelper.getusedcols()
 dataset = pd.read_csv(data_source_url, usecols=columns_to_read, converters={'delivery_address_zip': str})
 
-dataFrameHelper.add_country_distances(dataset)
+dataset.dropna(subset=['requested_delivery_date'], inplace=True)
+dataset.drop('requested_delivery_date', axis=1, inplace=True)
 
+dataFrameHelper.fillNaVals(dataset)
+dataFrameHelper.add_country_distances(dataset)
 dataFrameHelper.add_eu_flag_customer(dataset)
 dataFrameHelper.add_eu_flag_supplier(dataset)
-
 dataFrameHelper.add_us_flag_customer(dataset)
 dataFrameHelper.add_us_flag_supplier(dataset)
-
 dataFrameHelper.add_asia_flag_customer(dataset)
 dataFrameHelper.add_asia_flag_supplier(dataset)
-
-# dataFrameHelper.add_intercontitental(dataset)
-
-
 dataset['deviation_type'] = 0
 dataFrameHelper.set_deviation_types(dataset)
 dataset.drop('delivery_deviation_in_days', axis=1, inplace=True)
-
-dataset = dataset.dropna()
+dataset.drop('late', axis=1, inplace=True)
+dataset.drop('early', axis=1, inplace=True)
+dataset.drop('on_time', axis=1, inplace=True)
 
 columns_to_encode = dataFrameHelper.getLabelCols()
 
@@ -37,16 +35,7 @@ for col_name_to_label in columns_to_encode:
     encoder_1 = joblib.load(col_name_to_label + '.npy')
     dataset[col_name_to_label] = encoder_1.transform(dataset[col_name_to_label])
 
-
-
-dataFrameHelper.move_df_sunday(dataset, 'deliver_on_day')
-dataFrameHelper.move_df_sunday(dataset, 'order_created_on_day')
-dataset.drop('late', axis=1, inplace=True)
-dataset.drop('early', axis=1, inplace=True)
-
-
 nr_of_cols = len(dataset.columns) - 1
-
 
 X = dataset.iloc[:, 0:nr_of_cols].values
 Y = dataset.iloc[:, nr_of_cols].values
@@ -91,4 +80,5 @@ for i in range(1,m):
         corect_predictions = corect_predictions + 1
     print('{}. actual value : {}, predicted value : {} {} {} '.format(i, actual_value, prediction_label, predictions[i], not_valid_flag))
 
-print('Predicted {} out of {}'.format(corect_predictions, total_predictions))
+percent = (corect_predictions / total_predictions) * 100
+print('Predicted {} out of {} so : {} %'.format(corect_predictions, total_predictions, percent))
