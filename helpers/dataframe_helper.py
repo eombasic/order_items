@@ -38,7 +38,7 @@ class DataframeHelper:
         "same_zip":                     {"use": True, "label_encode": False},
         "item_count":                   {"use": True, "label_encode": False},
         "order_item_quantity_count":    {"use": True, "label_encode": False},
-        "requested_delivery_date":      {"use": False, "label_encode": False},
+        "requested_delivery_date":      {"use": True, "label_encode": False},
         "delivery_date":                {"use": False, "label_encode": False},
         "original_lifespan":            {"use": True, "label_encode": False},
     }
@@ -120,10 +120,15 @@ class DataframeHelper:
         print(df.describe())
         # print("dupplicated rows {}".format(df.duplicated()))
 
+    def printFirstNa(self, df):
+        nulls = df[df.isnull().any(axis=1)]
+        print(nulls.iloc[0])
+
     def preprocess(self, df):
         # df[['early', 'on_time', 'late']] = df[['early', 'on_time', 'late']].fillna(value=0)
-        df.drop_duplicates(keep='first', inplace=True)
+        # df.drop_duplicates(keep='first', inplace=True)
         #df.dropna(inplace=True)
+        return True
 
     def move_sunday(self, row):
         if row['deliver_on_day'] == 1:

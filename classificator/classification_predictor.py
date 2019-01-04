@@ -9,7 +9,7 @@ import numpy as np
 
 from helpers import dataframe_helper
 
-data_source_url = '../data/data_raw.csv'
+data_source_url = '../data/data.csv'
 
 dataFrameHelper = dataframe_helper.DataframeHelper()
 
@@ -19,20 +19,12 @@ dataset = pd.read_csv(data_source_url, usecols=columns_to_read, converters={'del
 
 dataFrameHelper.preprocess(dataset)
 
-'''
-pairs = dataset.groupby(['supplier_country', 'delivery_address_country']).size().sort_values(ascending=False)
-print(pairs)
-print(dataset['delivery_address_country'].value_counts())
-print(dataset['supplier_country'].value_counts())
-exit()
-'''
+dataset.dropna(subset=['requested_delivery_date'], inplace=True)
+dataset.drop('requested_delivery_date', axis=1, inplace=True)
 
-
-# correlations = dataset.corr()
-# dataFrameHelper.printDataFrameInfo(dataset)
-
-# dataFrameHelper.move_df_sunday(dataset, 'deliver_on_day')
-# dataFrameHelper.move_df_sunday(dataset, 'order_created_on_day')
+dataset['item_quantity_created_by_supplier'] = dataset['item_quantity_created_by_supplier'].fillna('0')
+dataset['supplier_country'] = dataset['supplier_country'].fillna('-')
+dataset['delivery_address_country'] = dataset['delivery_address_country'].fillna('-')
 
 dataFrameHelper.add_country_distances(dataset)
 
@@ -45,39 +37,13 @@ dataFrameHelper.add_us_flag_supplier(dataset)
 dataFrameHelper.add_asia_flag_customer(dataset)
 dataFrameHelper.add_asia_flag_supplier(dataset)
 
-# dataFrameHelper.add_intercontitental(dataset)
-# print(dataset['is_intercontinental'].value_counts())
-# exit()
-
-'''
-print(dataset['country_distance'].value_counts())
-print(dataset['country_distance'].value_counts())
-exit()
-'''
-
 dataset['deviation_type'] = 0
 dataFrameHelper.set_deviation_types(dataset)
 
 
-
-'''
-
-counts = dataset['group_structure_id'].value_counts()
-print(counts)
-
-counts = dataset['on_time'].value_counts()
-print(counts)
-
-counts = dataset['late'].value_counts()
-print(counts)
-'''
-
 dataset.drop('delivery_deviation_in_days', axis=1, inplace=True)
 dataset.drop('late', axis=1, inplace=True)
 dataset.drop('early', axis=1, inplace=True)
-
-
-
 
 columns_to_encode = dataFrameHelper.getLabelCols()
 
@@ -102,41 +68,21 @@ y1 = encoder.transform(y)
 Y = pd.get_dummies(y1).values
 joblib.dump(encoder, 'y_encoder.npy')
 
-
-
 deviation_type_value_counts = dataset['deviation_type'].value_counts(normalize=True)
-
 
 on_time_weight = 100 - (deviation_type_value_counts['on_time']*100)
 early_weight = 100 - (deviation_type_value_counts['early']*100)
 late_weight = 100 - (deviation_type_value_counts['late']*100)
 
-print(on_time_weight)
-print(early_weight)
-print(late_weight)
-
-print(encoder.classes_)
-print(type(encoder.classes_))
-
 early_index = np.where(encoder.classes_ == 'early')
-print(early_index)
-print(early_index[0][0])
-
 on_time_index = np.where(encoder.classes_ == 'on_time')
-print(on_time_index)
-print(on_time_index[0][0])
-
 late_index = np.where(encoder.classes_ == 'late')
-print(late_index)
-print(late_index[0][0])
-#exit()
 
 class_weight = {on_time_index[0][0]: on_time_weight,
                 late_index[0][0]: late_weight,
                 early_index[0][0]: early_weight}
 
-print(class_weight)
-
+# print(class_weight)
 
 model = Sequential()
 model.add(Dense(nr_of_cols,input_shape=(nr_of_cols,),activation='relu', name='features'))
