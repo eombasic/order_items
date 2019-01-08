@@ -5,18 +5,43 @@ import numpy as np
 from sklearn.externals import joblib
 from keras.models import model_from_json
 from helpers import dataframe_helper
-import json
+from helpers import response_helper
 
 args = sys.argv
-response = {}
+response = {
+    'error': 'no'
+}
 
-data_source_url = args[1]
+arg_names = ['command', 'data_source_url']
+args = dict(zip(arg_names, sys.argv))
+
+responseHelper = response_helper.ResponseHelper()
+responseHelper.setResponse(response)
+
+is_data_source_url_set = 'data_source_url' in args
+
+if not is_data_source_url_set:
+    responseHelper.flushError('no_data_source_url')
+
+data_source_url = args['data_source_url']
+
+if not len(data_source_url) > 0:
+    responseHelper.flushError('data_source_url_empty')
+
+if not os.path.isfile(data_source_url):
+    responseHelper.flushError('data_source_file_does_not_exist')
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 dataFrameHelper = dataframe_helper.DataframeHelper()
 
 columns_to_read = dataFrameHelper.getusedcols()
-dataset = pd.read_csv(data_source_url, usecols=columns_to_read, converters={'delivery_address_zip': str})
+
+try:
+    dataset = pd.read_csv(data_source_url, usecols=columns_to_read, converters={'delivery_address_zip': str})
+except:
+    e = sys.exc_info()[0]
+    responseHelper.flushError('pandas_error : {}'.format(e))
 
 dataset.dropna(subset=['requested_delivery_date'], inplace=True)
 dataset.drop('requested_delivery_date', axis=1, inplace=True)
@@ -40,34 +65,28 @@ columns_to_encode = dataFrameHelper.getLabelCols()
 
 for col_name_to_label in columns_to_encode:
     label_file = dir_path + '/classificator/' + col_name_to_label + '.npy'
-    encoder_1 = joblib.load(label_file)
+    try:
+        encoder_1 = joblib.load(label_file)
+    except:
+        responseHelper.flushError('cant_load_col_label_npy: ' + label_file)
     dataset[col_name_to_label] = encoder_1.transform(dataset[col_name_to_label])
-
 
 nr_of_cols = len(dataset.columns) - 1
 
 X = dataset.iloc[:, 0:nr_of_cols].values
-Y = dataset.iloc[:, nr_of_cols].values
-
 encoder = joblib.load(dir_path + '/classificator/y_encoder.npy')
-y1 = encoder.transform(Y)
 encoder_classes = encoder.classes_
 
 le_name_mapping = dict(zip(encoder.classes_, encoder.transform(encoder.classes_)))
-# print(le_name_mapping)
-
 
 # load json and create model
 json_file = open(dir_path + '/classificator/model.json', 'r')
 loaded_model_json = json_file.read()
 json_file.close()
 loaded_model = model_from_json(loaded_model_json)
-# load weights into new model
 loaded_model.load_weights(dir_path + "/classificator/model.h5")
-# print("Loaded model from disk")
 
 predictions = loaded_model.predict(X)
-
 results = []
 
 m,n = predictions.shape
@@ -85,6 +104,4 @@ for i in range(1,m):
 
 response['results'] = results
 response['encoder_classes'] = encoder_classes.tolist()
-json_response = json.dumps(response)
-print(json_response)
-# print('lala')
+responseHelper.flush()
