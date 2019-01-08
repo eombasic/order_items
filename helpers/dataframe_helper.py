@@ -120,10 +120,11 @@ class DataframeHelper:
         print(df.describe())
         # print("dupplicated rows {}".format(df.duplicated()))
 
-    def fillNaVals(self, df):
+    def fillNaVals(self, df, verbose = True):
         for col_name, col_definition in self.col_definitions.items():
             if col_definition["fillna"]:
-                print("Fill {} with {}".format(col_name, col_definition['fillna_val']))
+                if verbose:
+                    print("Fill {} with {}".format(col_name, col_definition['fillna_val']))
                 df[col_name] = df[col_name].fillna(col_definition['fillna_val'])
 
     def printFirstNa(self, df):
