@@ -30,6 +30,10 @@ dataFrameHelper.add_us_flag_customer(dataset)
 dataFrameHelper.add_us_flag_supplier(dataset)
 dataFrameHelper.add_asia_flag_customer(dataset)
 dataFrameHelper.add_asia_flag_supplier(dataset)
+
+cat_columns = dataFrameHelper.get_cat_columns()
+dataset = pd.get_dummies(dataset, prefix_sep="__", columns=cat_columns, drop_first=True)
+
 dataset['deviation_type'] = 0
 dataFrameHelper.set_deviation_types(dataset)
 dataset.drop('delivery_deviation_in_days', axis=1, inplace=True)
@@ -49,6 +53,18 @@ for col_name_to_label in columns_to_encode:
 
 
 nr_of_cols = len(dataset.columns) - 1
+
+
+cat_dummies = [col for col in dataset
+               if "__" in col
+               and col.split("__")[0] in cat_columns]
+
+print('cat_dummies {}'.format(cat_dummies))
+joblib.dump(cat_dummies, 'cat_dummies.npy')
+
+processed_columns = list(dataset.columns[:])
+print('processed columns {}'.format(processed_columns))
+joblib.dump(processed_columns, 'processed_columns.npy')
 
 X = dataset.iloc[:, 0:nr_of_cols].values
 y = dataset.iloc[:, nr_of_cols].values
@@ -83,7 +99,7 @@ model.add(Dropout(0.2))
 model.add(Dense(7,activation='relu'))
 model.add(Dense(5,activation='relu'))
 model.add(Dense(3,activation='softmax'))
-model.compile(Adam(lr=0.0001),'categorical_crossentropy',metrics=['accuracy'])
+model.compile(Adam(lr=0.0001),'categorical_crossentropy',metrics=['accuracy', 'categorical_crossentropy'])
 model.fit(X, Y, epochs=20, batch_size=500, class_weight=class_weight)
 model.summary()
 

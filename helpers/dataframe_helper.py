@@ -16,11 +16,11 @@ class DataframeHelper:
         "idx":                          {"use": True, "label_encode": True, "fillna": False},
         "unit_id":                      {"use": True, "label_encode": True, "fillna": False},
         "group_structure_id":           {"use": True, "label_encode": True, "fillna": True, "fillna_val": 0},
-        "purchasing_organisation":      {"use": True, "label_encode": True, "fillna": False},
+        "purchasing_organisation":      {"use": True, "label_encode": False, "fillna": False},
         "company_code":                 {"use": True, "label_encode": True, "fillna": False},
         "order_incoterm":               {"use": True, "label_encode": True, "fillna": False},
         "zterm_name":                   {"use": True, "label_encode": True, "fillna": True, "fillna_val": '-'},
-        "order_type":                   {"use": True, "label_encode": True, "fillna": False},
+        "order_type":                   {"use": True, "label_encode": False, "fillna": False},
         "item_created_by_supplier":     {"use": True, "label_encode": False, "fillna": False},
         "item_quantity_created_by_supplier":          {"use": True, "label_encode": False, "fillna": True, "fillna_val": '0'},
         "order_created_on_day":         {"use": True, "label_encode": False, "fillna": False},
@@ -225,3 +225,6 @@ class DataframeHelper:
 
     def add_intercontitental(self, df):
         df['is_intercontinental'] = df.apply(self.is_intercontitnental, axis=1)
+
+    def get_cat_columns(self):
+        return ['order_type', 'purchasing_organisation']

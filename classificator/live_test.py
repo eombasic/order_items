@@ -22,6 +22,31 @@ dataFrameHelper.add_us_flag_customer(dataset)
 dataFrameHelper.add_us_flag_supplier(dataset)
 dataFrameHelper.add_asia_flag_customer(dataset)
 dataFrameHelper.add_asia_flag_supplier(dataset)
+
+cat_columns = dataFrameHelper.get_cat_columns()
+dataset = pd.get_dummies(dataset, prefix_sep="__", columns=cat_columns, drop_first=True)
+
+
+cat_dummies = joblib.load('cat_dummies.npy')
+print('loaded cat_dummies:')
+print(cat_dummies)
+
+# Remove additional columns
+for col in dataset.columns:
+    if ("__" in col) and (col.split("__")[0] in cat_columns) and col not in cat_dummies:
+        print("Removing additional feature {}".format(col))
+        dataset.drop(col, axis=1, inplace=True)
+
+# Add missing columns
+for col in cat_dummies:
+    if col not in dataset.columns:
+        print("Adding missing feature {}".format(col))
+        dataset[col] = 0
+
+processed_columns = joblib.load('processed_columns.npy')
+print('loaded processed_columns')
+print(processed_columns)
+
 dataset['deviation_type'] = 0
 dataFrameHelper.set_deviation_types(dataset)
 dataset.drop('delivery_deviation_in_days', axis=1, inplace=True)
@@ -34,6 +59,9 @@ columns_to_encode = dataFrameHelper.getLabelCols()
 for col_name_to_label in columns_to_encode:
     encoder_1 = joblib.load(col_name_to_label + '.npy')
     dataset[col_name_to_label] = encoder_1.transform(dataset[col_name_to_label])
+
+
+dataset = dataset[processed_columns]
 
 nr_of_cols = len(dataset.columns) - 1
 
