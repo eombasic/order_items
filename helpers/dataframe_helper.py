@@ -15,11 +15,11 @@ class DataframeHelper:
         "item_commodity_id":            {"use": True, "label_encode": True, "fillna": True, "fillna_val": 0},
         "idx":                          {"use": True, "label_encode": True, "fillna": False},
         "unit_id":                      {"use": True, "label_encode": True, "fillna": False},
-        "group_structure_id":           {"use": True, "label_encode": True, "fillna": True, "fillna_val": 0},
+        "group_structure_id":           {"use": True, "label_encode": False, "fillna": True, "fillna_val": 0},
         "purchasing_organisation":      {"use": True, "label_encode": False, "fillna": False},
-        "company_code":                 {"use": True, "label_encode": True, "fillna": False},
-        "order_incoterm":               {"use": True, "label_encode": True, "fillna": False},
-        "zterm_name":                   {"use": True, "label_encode": True, "fillna": True, "fillna_val": '-'},
+        "company_code":                 {"use": True, "label_encode": False, "fillna": False},
+        "order_incoterm":               {"use": True, "label_encode": False, "fillna": False},
+        "zterm_name":                   {"use": True, "label_encode": False, "fillna": True, "fillna_val": '-'},
         "order_type":                   {"use": True, "label_encode": False, "fillna": False},
         "item_created_by_supplier":     {"use": True, "label_encode": False, "fillna": False},
         "item_quantity_created_by_supplier":          {"use": True, "label_encode": False, "fillna": True, "fillna_val": '0'},
@@ -30,8 +30,8 @@ class DataframeHelper:
         "cluster_id":                   {"use": True, "label_encode": True, "fillna": True, "fillna_val": 0},
         "parent_cluster_id":            {"use": True, "label_encode": True, "fillna": False},
         "root_cluster":                 {"use": True, "label_encode": False, "fillna": False},
-        "supplier_country":             {"use": True, "label_encode": True, "fillna": True, "fillna_val": '-'},
-        "delivery_address_country":     {"use": True, "label_encode": True, "fillna": True, "fillna_val": '-'},
+        "supplier_country":             {"use": True, "label_encode": False, "fillna": True, "fillna_val": '-'},
+        "delivery_address_country":     {"use": True, "label_encode": False, "fillna": True, "fillna_val": '-'},
         "supplier_zip":                 {"use": False, "label_encode": True, "fillna": False},
         "delivery_address_zip":         {"use": True, "label_encode": True, "fillna": False},
         "same_country":                 {"use": True, "label_encode": False, "fillna": False},
@@ -151,8 +151,6 @@ class DataframeHelper:
         ret = 'on_time'
         if row['late'] > 0:
             ret = 'late'
-        if row['early'] > 0:
-            ret = 'early'
         return ret
 
     def set_deviation_types(self, df):
@@ -227,4 +225,4 @@ class DataframeHelper:
         df['is_intercontinental'] = df.apply(self.is_intercontitnental, axis=1)
 
     def get_cat_columns(self):
-        return ['order_type', 'purchasing_organisation']
+        return ['order_type', 'purchasing_organisation', 'group_structure_id', 'company_code', 'order_incoterm', 'zterm_name',  'supplier_country', 'delivery_address_country']

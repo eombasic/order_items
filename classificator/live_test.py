@@ -11,6 +11,8 @@ dataFrameHelper = dataframe_helper.DataframeHelper()
 columns_to_read = dataFrameHelper.getusedcols()
 dataset = pd.read_csv(data_source_url, usecols=columns_to_read, converters={'delivery_address_zip': str})
 
+dataset.drop_duplicates(keep='first', inplace=True)
+
 dataset.dropna(subset=['requested_delivery_date'], inplace=True)
 dataset.drop('requested_delivery_date', axis=1, inplace=True)
 
@@ -24,7 +26,7 @@ dataFrameHelper.add_asia_flag_customer(dataset)
 dataFrameHelper.add_asia_flag_supplier(dataset)
 
 cat_columns = dataFrameHelper.get_cat_columns()
-dataset = pd.get_dummies(dataset, prefix_sep="__", columns=cat_columns, drop_first=True)
+dataset = pd.get_dummies(dataset, prefix_sep="__", columns=cat_columns)
 
 
 cat_dummies = joblib.load('cat_dummies.npy')
