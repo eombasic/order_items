@@ -226,3 +226,6 @@ class DataframeHelper:
 
     def get_cat_columns(self):
         return ['order_type', 'purchasing_organisation', 'group_structure_id', 'company_code', 'order_incoterm', 'zterm_name',  'supplier_country', 'delivery_address_country']
+
+    def foo(self):
+        return 'Dataframe Bar'
