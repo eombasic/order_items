@@ -1,3 +1,5 @@
+__author__ = "Emir Ombasic"
+
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from keras.models import Sequential

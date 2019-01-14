@@ -1,3 +1,5 @@
+__author__ = "Emir Ombasic"
+
 import importlib
 import pandas as pd
 import numpy as np

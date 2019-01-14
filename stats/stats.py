@@ -1,3 +1,5 @@
+__author__ = "Emir Ombasic"
+
 import pandas as pd
 from helpers import dataframe_helper
 

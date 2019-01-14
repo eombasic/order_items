@@ -1,3 +1,5 @@
+__author__ = "Emir Ombasic"
+
 import json
 
 class ResponseHelper:

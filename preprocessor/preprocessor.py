@@ -1,3 +1,5 @@
+__author__ = "Emir Ombasic"
+
 import pandas as pd
 
 data_source_url = '../data/data_raw.csv'

@@ -1,3 +1,5 @@
+__author__ = "Emir Ombasic"
+
 import sys
 import os
 import pandas as pd

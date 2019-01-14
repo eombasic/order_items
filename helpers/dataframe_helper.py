@@ -1,3 +1,5 @@
+__author__ = "Emir Ombasic"
+
 class DataframeHelper:
 
     data_path = '../data/'
